@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
-# install-supermon-announcements.sh
+# install-supermon-announcements-full.sh
 # COMPLETE installer for N5AD's Supermon 7.4+ Announcements Manager
-# Clones PHP files, sets permissions, configures sudoers, AND fixes link.php ending
+# Includes delete_file.php, link.php fix, permissions, sudoers, etc.
 #
-# Run as root: sudo bash install-supermon-announcements.sh
+# Run as root: sudo bash install-supermon-announcements-full.sh
 #
 # GitHub: https://github.com/n5ad/Supermon-7.4-announcement-creation-and-management-of-cron
 # Author: N5AD - January 2026
@@ -75,46 +75,90 @@ echo_step "1. Cloning GitHub repo (PHP files)"
 rm -rf "$TEMP_CLONE"
 git clone --depth 1 "$REPO_URL" "$TEMP_CLONE" || error "Git clone failed"
 
-# 2. Directories
-echo_step "2. Creating directories"
+# 2. Create directories
+echo_step "2. Creating required directories"
 mkdir -p "$CUSTOM_DIR" "$MP3_DIR" "$SOUNDS_DIR"
 
 # 3. Copy PHP files
 echo_step "3. Installing PHP files"
-cp -v "$TEMP_CLONE"/*.php "$TEMP_CLONE"/*.inc "$CUSTOM_DIR"/ 2>/dev/null || warn "No PHP/inc files"
+cp -v "$TEMP_CLONE"/*.php "$TEMP_CLONE"/*.inc "$CUSTOM_DIR"/ 2>/dev/null || warn "No PHP/inc files copied"
 
-rm -rf "$TEMP_CLONE"
+# 4. Create delete_file.php
+echo_step "4. Creating delete_file.php endpoint"
+cat > "${CUSTOM_DIR}/delete_file.php" << 'EOF'
+<?php
+// delete_file.php - Delete MP3 or UL file
 
-# 4. Permissions & ownership
-echo_step "4. Setting ownership & permissions"
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo "Method not allowed.";
+    exit;
+}
+
+if (empty($_POST['type']) || empty($_POST['file'])) {
+    echo "Missing parameters.";
+    exit;
+}
+
+$type = $_POST['type']; // 'mp3' or 'ul'
+$filename = basename($_POST['file']);
+
+if ($type === 'mp3') {
+    $file_path = "/mp3/" . $filename;
+} elseif ($type === 'ul') {
+    // Use base name only (strip .ul if present)
+    $base = pathinfo($filename, PATHINFO_FILENAME);
+    $file_path = "/usr/local/share/asterisk/sounds/" . $base . ".ul";
+} else {
+    echo "Invalid type.";
+    exit;
+}
+
+if (!file_exists($file_path)) {
+    echo "File not found: $filename";
+    exit;
+}
+
+if (unlink($file_path)) {
+    echo "Deleted $filename successfully.";
+} else {
+    echo "Failed to delete $filename. Check permissions.";
+}
+?>
+EOF
+
+# 5. Permissions & ownership
+echo_step "5. Setting ownership & permissions"
 chown -R ${APACHE_USER}:${APACHE_USER} "$CUSTOM_DIR" "$MP3_DIR"
 chmod -R 755 "$CUSTOM_DIR" "$MP3_DIR"
+chown -R ${APACHE_USER}:${APACHE_USER} "$MP3_DIR"
+chmod -R 775 "$MP3_DIR"   # allow delete
 
 chown -R ${ASTERISK_USER}:${ASTERISK_GROUP} "$SOUNDS_DIR"
-chmod -R 755 "$SOUNDS_DIR"
+chmod -R 775 "$SOUNDS_DIR"   # allow delete
 
 # Existing scripts
 chmod 755 "$PLAY_SCRIPT" 2>/dev/null && chown root:root "$PLAY_SCRIPT" 2>/dev/null || warn "playaudio.sh not found"
 chmod 755 "$CONVERT_SCRIPT" 2>/dev/null && chown root:root "$CONVERT_SCRIPT" 2>/dev/null || warn "audio_convert.sh not found"
 
-# 5. Fix link.php ending
-echo_step "5. Fixing link.php ending"
+# 6. Fix link.php ending
+echo_step "6. Fixing link.php ending"
 if [[ -f "$LINKPHP_PATH" ]]; then
     cp "$LINKPHP_PATH" "$LINKPHP_BACKUP"
     echo "Backup created: $LINKPHP_BACKUP"
 
-    # Keep everything up to (but not including) the footer include
+    # Remove old footer include section
     sed -i "/include_once \"footer.inc\";/,\$d" "$LINKPHP_PATH"
 
-    # Append desired ending
+    # Append correct ending
     echo "$DESIRED_ENDING" >> "$LINKPHP_PATH"
-    echo "link.php updated – now ends with announcement include + breaks + footer"
+    echo "link.php updated"
 else
-    warn "link.php not found at $LINKPHP_PATH – skipping fix"
+    warn "link.php not found – skipping fix"
 fi
 
-# 6. Sudoers
-echo_step "6. Configuring sudoers"
+# 7. Sudoers
+echo_step "7. Configuring sudoers"
 cat > "$SUDOERS_DROPIN" << EOF
 # Supermon Announcements Manager - N5AD
 ${APACHE_USER} ALL=(root) NOPASSWD: ${PLAY_SCRIPT}
@@ -125,18 +169,19 @@ EOF
 chmod 0440 "$SUDOERS_DROPIN"
 visudo -c >/dev/null 2>&1 && echo "sudoers OK" || error "sudoers syntax FAILED"
 
-# 7. Reload
-echo_step "7. Reloading services"
+# 8. Reload services
+echo_step "8. Reloading services"
 systemctl reload apache2 2>/dev/null || warn "Apache reload failed"
 asterisk -rx "core reload" 2>/dev/null || warn "Asterisk reload failed"
 
-# 8. Done
-echo_step "8. Installation complete!"
+# 9. Done
+echo_step "9. Installation complete!"
 echo "Verification commands:"
 echo "  sudo -u www-data sudo ${PLAY_SCRIPT} netreminder"
 echo "  sudo -u www-data sudo crontab -l"
 echo "  ls -ld ${CUSTOM_DIR} ${MP3_DIR} ${SOUNDS_DIR}"
 echo "  tail -n 5 ${LINKPHP_PATH}"
 echo ""
-echo "Log into Supermon → Announcements Manager should now appear."
+echo "Log into Supermon → Announcements Manager should appear."
+echo "Test Delete MP3 / Delete UL buttons."
 echo "73 — N5AD"
