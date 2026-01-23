@@ -2,11 +2,17 @@
 // announcement.inc
 // Loaded only after Supermon login
 ?>
+
 <?php if (isset($_SESSION['sm61loggedin']) && $_SESSION['sm61loggedin'] === true) { ?>
+
 <hr style="margin-top:30px;">
+
 <div id="bottom_cron_section" style="margin-top:20px;">
+
 <br>
+
 <h3>Announcements Manager</h3>
+
 <!-- MP3 Section -->
 <select id="mp3_select" class="submit" style="border:2px solid #444; width: 250px;">
     <option value="">-- Select Audio File (MP3-WAV) --</option>
@@ -14,6 +20,7 @@
 <input type="button" class="submit" value="Install Announcement" id="install_announcement">
 <input type="button" class="submit" value="Delete MP3" id="delete_mp3" style="background-color:#dc3545; color:white; border:1px solid #c82333;">
 <br><br>
+
 <!-- UL Section -->
 <select id="ul_select" class="submit" style="border:2px solid #444; width: 250px;">
     <option value="">-- Select Announcement --</option>
@@ -21,7 +28,25 @@
 <input type="button" class="submit" value="Play Now" id="run_ul">
 <input type="button" class="submit" value="Delete UL" id="delete_ul" style="background-color:#dc3545; color:white; border:1px solid #c82333;">
 <br><br>
+
+<!-- Piper TTS Section - NEW -->
+<h3>Generate Announcement with Piper TTS</h3>
+
+<textarea id="tts_text" rows="4" cols="60" placeholder="Enter the text you want to convert to speech..."></textarea>
+<br><br>
+
+<label for="tts_filename">Filename (without extension):</label>
+<input type="text" id="tts_filename" placeholder="e.g., myannounce" style="width: 200px;">
+<br><br>
+
+<button id="generate_tts" class="submit">Generate WAV File</button>
+
+<div id="tts_status" style="margin-top:10px; font-weight:bold; color:#28a745;"></div>
+
+<br><br>
+
 <h3>Cron Manager</h3>
+
 <table id="cron_table" border="1" cellpadding="5" style="width:100%; border-collapse: collapse;">
     <thead>
         <tr>
@@ -40,10 +65,15 @@
         <!-- Cron entries will be populated here -->
     </tbody>
 </table>
+
 </div>
+
 <!-- JavaScript -->
+
 <script>
+
 $(document).ready(function () {
+
     // ====== MP3 Dropdown ======
     function loadMP3Dropdown() {
         $.getJSON("custom/list_mp3.php", function(files) {
@@ -56,6 +86,7 @@ $(document).ready(function () {
         });
     }
     loadMP3Dropdown();
+
     // ====== UL Dropdown ======
     function loadULDropdown() {
         $.getJSON("custom/list_ul.php", function(files) {
@@ -68,6 +99,7 @@ $(document).ready(function () {
         });
     }
     loadULDropdown();
+
     // ====== Delete MP3 ======
     $("#delete_mp3").click(function() {
         let mp3 = $("#mp3_select").val();
@@ -78,6 +110,7 @@ $(document).ready(function () {
             loadMP3Dropdown();
         }).fail(function() { alert("Delete failed."); });
     });
+
     // ====== Delete UL ======
     $("#delete_ul").click(function() {
         let ul = $("#ul_select").val();
@@ -88,6 +121,30 @@ $(document).ready(function () {
             loadULDropdown();
         }).fail(function() { alert("Delete failed."); });
     });
+
+    // ====== Piper TTS Generation ======
+    $("#generate_tts").click(function() {
+        let text = $("#tts_text").val().trim();
+        let filename = $("#tts_filename").val().trim();
+
+        if (!text) { alert("Enter some text to convert."); return; }
+        if (!filename) { alert("Enter a filename."); return; }
+
+        if (!confirm("Generate WAV file '" + filename + ".wav' from text?")) return;
+
+        $("#tts_status").text("Generating WAV... Please wait.").css("color", "#28a745");
+
+        $.post("custom/piper_generate.php", {
+            text: text,
+            filename: filename
+        }, function(data) {
+            $("#tts_status").text(data);
+            loadMP3Dropdown(); // Refresh MP3 dropdown to show new .wav file
+        }).fail(function() {
+            $("#tts_status").text("Failed to generate WAV file.").css("color", "#dc3545");
+        });
+    });
+
     // ====== Cron List with Separated Time Columns & Toggle ======
     function loadCronList() {
         $.getJSON("custom/list_cron.php", function(crons) {
@@ -276,4 +333,5 @@ $(document).ready(function () {
     });
 });
 </script>
+
 <?php } ?>
