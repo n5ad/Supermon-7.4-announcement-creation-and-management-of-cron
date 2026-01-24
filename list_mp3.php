@@ -34,3 +34,18 @@ foreach ($wav_files as $f) {
     $files[] = basename($f);
 
 }
+// Sort alphabetically for nicer display
+
+sort($files);
+
+
+// Remove duplicates (in case someone has both .mp3 and .wav with same base name)
+
+$files = array_unique($files);
+
+
+header('Content-Type: application/json');
+
+echo json_encode($files);
+
+?>
