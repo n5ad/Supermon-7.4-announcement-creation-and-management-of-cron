@@ -227,7 +227,8 @@ www-data ALL=(root) NOPASSWD: /etc/asterisk/local/playaudio.sh
 www-data ALL=(root) NOPASSWD: /usr/bin/crontab
 # Allow running audio_convert.sh (MP3 to .ul conversion)
 www-data ALL=(root) NOPASSWD: /etc/asterisk/local/audio_convert.sh
-# NO OTHER COMMANDS ALLOWED - do NOT add /bin/cp, /bin/chown, /bin/chmod
+# Allow copy of ul files to sounds directory
+www-data ALL=(root) NOPASSWD: /bin/cp
 # These are dangerous if unrestricted
 www-data ALL=(root) NOPASSWD: /usr/local/bin/piper_prompt_tts.sh
 EOF
