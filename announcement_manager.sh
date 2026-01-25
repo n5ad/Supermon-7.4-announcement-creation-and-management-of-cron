@@ -10,6 +10,8 @@
 # - Sets ownership & permissions on files
 # - Modifies /var/www/html/supermon/link.php: replaces everything after the last </div> with the new announcement + footer includes (idempotent)
 # - Creates /etc/sudoers.d/99-supermon-announcements for www-data (passwordless access to required commands)
+# - Installs Piper TTS 1.2.0 ARM64 (binary + libs in /opt/piper/bin/, voices in /opt/piper/voices/)
+# - Downloads piper_generate.php and piper_prompt_tts.sh and makes them executable
 # - Safe & idempotent (can run multiple times)
 #
 # Run as root: sudo bash setup-supermon-announcements.sh
@@ -38,7 +40,6 @@ check_root() { [[ $EUID -eq 0 ]] || error "Run as root (sudo)."; }
 # Install required packages FIRST – before any git clone!
 # ────────────────────────────────────────────────
 check_root
-
 echo_step "0. Installing required packages (sox, libsox-fmt-mp3, git, perl)"
 PACKAGES_TO_INSTALL=""
 for pkg in sox libsox-fmt-mp3 git perl; do
@@ -46,13 +47,12 @@ for pkg in sox libsox-fmt-mp3 git perl; do
         PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL $pkg"
     fi
 done
-
 if [[ -n "$PACKAGES_TO_INSTALL" ]]; then
-    echo "Installing missing packages:$PACKAGES_TO_INSTALL"
+    echo "Installing missing packages: $PACKAGES_TO_INSTALL"
     apt update && apt install -y $PACKAGES_TO_INSTALL || error "Failed to install packages. Check your internet/apt sources."
     echo "Packages installed successfully."
 else
-    echo "All required packages (sox, libsox-fmt-mp3, git, perl) are already installed."
+    echo "All required packages (sox, libsox-fmt-mp3, git, perl) are already installed – skipping."
 fi
 
 # Now git and perl are guaranteed to be available – proceed
@@ -117,7 +117,6 @@ mkdir -p "$LOCAL_DIR"
 chown asterisk:asterisk "$LOCAL_DIR" 2>/dev/null || chown root:root "$LOCAL_DIR"
 chmod 755 "$LOCAL_DIR"
 
-# ----- playaudio.sh (exact from KD5FMU GitHub) -----
 PLAY_SCRIPT="$LOCAL_DIR/playaudio.sh"
 if [[ ! -f "$PLAY_SCRIPT" ]]; then
     echo "Creating $PLAY_SCRIPT (missing)"
@@ -145,7 +144,6 @@ else
     echo "$PLAY_SCRIPT already exists – skipping"
 fi
 
-# ----- audio_convert.sh (exact from KD5FMU GitHub) -----
 CONVERT_SCRIPT="$LOCAL_DIR/audio_convert.sh"
 if [[ ! -f "$CONVERT_SCRIPT" ]]; then
     echo "Creating $CONVERT_SCRIPT (missing)"
@@ -236,9 +234,62 @@ EOF
     echo "Sudoers file created successfully."
 fi
 
-# 7. Final verification
-echo_step "7. Setup complete – verification"
+# 7. Install Piper TTS 1.2.0 ARM64 (your preferred structure)
+echo_step "7. Installing Piper TTS 1.2.0 ARM64"
+if [[ -f "/opt/piper/bin/piper" ]]; then
+    echo "Piper already installed – skipping"
+else
+    # Download and extract Piper binary + libs
+    sudo wget https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_arm64.tar.gz -O /tmp/piper.tar.gz
+    sudo mkdir -p /opt/piper/bin
+    sudo tar -xzf /tmp/piper.tar.gz -C /opt/piper/bin
+    sudo chmod +x /opt/piper/bin/piper
+    sudo mkdir -p /opt/piper/voices
+    cd /opt/piper/voices
+    sudo wget -4 https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx
+    sudo wget -4 https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
+    sudo chown www-data:www-data *.onnx *.onnx.json
+    sudo chmod 644 *.onnx *.onnx.json
+    rm /tmp/piper.tar.gz
+    echo "Piper installed successfully."
+fi
+
+# 8. Download piper_generate.php and piper_prompt_tts.sh
+echo_step "8. Downloading piper_generate.php and piper_prompt_tts.sh"
+# Download piper_generate.php
+if [[ -f "$TARGET_DIR/piper_generate.php" ]]; then
+    echo "$TARGET_DIR/piper_generate.php already exists – skipping"
+else
+    sudo wget -O "$TARGET_DIR/piper_generate.php" \
+      https://raw.githubusercontent.com/n5ad/announcement-manager/main/piper_generate.php
+    sudo chown www-data:www-data "$TARGET_DIR/piper_generate.php"
+    sudo chmod 644 "$TARGET_DIR/piper_generate.php"
+    echo "piper_generate.php downloaded."
+fi
+
+# Download piper_prompt_tts.sh
+if [[ -f "/usr/local/bin/piper_prompt_tts.sh" ]]; then
+    echo "/usr/local/bin/piper_prompt_tts.sh already exists – skipping"
+else
+    sudo wget -O /usr/local/bin/piper_prompt_tts.sh \
+      https://raw.githubusercontent.com/n5ad/announcement-manager/main/piper_prompt_tts.sh
+    sudo chown root:root /usr/local/bin/piper_prompt_tts.sh
+    sudo chmod +x /usr/local/bin/piper_prompt_tts.sh
+    echo "piper_prompt_tts.sh downloaded and made executable."
+fi
+
+# 9. Test Piper installation
+echo_step "9. Testing Piper installation"
+/opt/piper/bin/piper/piper --version
+# Generate a test WAV
+echo "This is a test of Piper TTS on node $(hostname)" | /opt/piper/bin/piper/piper --model /opt/piper/voices/en_US-lessac-medium.onnx --output_file /mp3/piper_test.wav
+# Check the test file
+ls -l /mp3/piper_test.wav
+
+# 10. Final verification
+echo_step "10. Setup complete – verification"
 echo "Run these to test:"
+echo " sudo -u www-data /opt/piper/bin/piper/piper --version"
 echo " sudo -u www-data $LOCAL_DIR/playaudio.sh netreminder"
 echo " sudo -u www-data $LOCAL_DIR/audio_convert.sh /mp3/test.mp3"
 echo " ls -ld $TARGET_DIR $MP3_DIR $LOCAL_DIR"
