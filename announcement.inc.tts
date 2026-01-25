@@ -10,6 +10,21 @@
 <div id="bottom_cron_section" style="margin-top:20px;">
 
 <br>
+<!-- Piper TTS Section - NEW -->
+<h3>Generate Announcement with Piper TTS</h3>
+
+<textarea id="tts_text" rows="4" cols="60" placeholder="Enter the text you want to convert to speech..."></textarea>
+<br><br>
+
+<label for="tts_filename">Filename (without extension):</label>
+<input type="text" id="tts_filename" placeholder="e.g., myannounce" style="width: 200px;">
+<br><br>
+
+<button id="generate_tts" class="submit">Generate WAV File</button>
+
+<div id="tts_status" style="margin-top:10px; font-weight:bold; color:#28a745;"></div>
+
+<br><br>
 
 <h3>Announcements Manager</h3>
 
@@ -29,21 +44,6 @@
 <input type="button" class="submit" value="Delete UL" id="delete_ul" style="background-color:#dc3545; color:white; border:1px solid #c82333;">
 <br><br>
 
-<!-- Piper TTS Section - NEW -->
-<h3>Generate Announcement with Piper TTS</h3>
-
-<textarea id="tts_text" rows="4" cols="60" placeholder="Enter the text you want to convert to speech..."></textarea>
-<br><br>
-
-<label for="tts_filename">Filename (without extension):</label>
-<input type="text" id="tts_filename" placeholder="e.g., myannounce" style="width: 200px;">
-<br><br>
-
-<button id="generate_tts" class="submit">Generate WAV File</button>
-
-<div id="tts_status" style="margin-top:10px; font-weight:bold; color:#28a745;"></div>
-
-<br><br>
 
 <h3>Cron Manager</h3>
 
