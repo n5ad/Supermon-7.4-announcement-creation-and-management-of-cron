@@ -278,13 +278,6 @@ ls -l /mp3/piper_test.wav
 
 # 10. Final verification
 echo_step "10. Setup complete – verification"
-echo "Run these to test:"
-echo " sudo -u www-data /opt/piper/bin/piper/piper --version"
-echo " sudo -u www-data $LOCAL_DIR/playaudio.sh netreminder"
-echo " sudo -u www-data $LOCAL_DIR/audio_convert.sh /mp3/test.mp3"
-echo " ls -ld $TARGET_DIR $MP3_DIR $LOCAL_DIR"
-echo " grep announcement.inc $LINK_PHP # to verify the include was added"
-echo " sudo visudo -c # to verify sudoers syntax"
-echo ""
+echo "I hope you get a lot of use from this"
 echo "Log into Supermon → Announcements Manager should now appear at the bottom."
 echo "73 — N5AD"
