@@ -220,6 +220,7 @@ www-data ALL=(root) NOPASSWD: /etc/asterisk/local/audio_convert.sh
 www-data ALL=(ALL) NOPASSWD: /bin/cp, /bin/chown, /bin/chmod
 # Allow running piper_prompt_tts.sh
 www-data ALL=(root) NOPASSWD: /usr/local/bin/piper_prompt_tts.sh
+# Allow deletion of UL FILES
 www-data ALL=(root) NOPASSWD: /bin/rm /usr/local/share/asterisk/sounds/*.ul
 EOF
     chmod 0440 "$SUDOERS_FILE"
