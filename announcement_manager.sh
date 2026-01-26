@@ -48,12 +48,22 @@ for pkg in sox libsox-fmt-mp3 git perl; do
         PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL $pkg"
     fi
 done
+
 if [[ -n "$PACKAGES_TO_INSTALL" ]]; then
-    echo "Installing missing packages: $PACKAGES_TO_INSTALL"
-    apt update && apt install -y $PACKAGES_TO_INSTALL || error "Failed to install packages. Check your internet/apt sources."
+    echo "Installing missing packages:$PACKAGES_TO_INSTALL"
+    apt update || error "apt update failed. Check internet or sources.list."
+    apt install -y $PACKAGES_TO_INSTALL || error "Failed to install packages: $PACKAGES_TO_INSTALL. Check internet/apt sources."
     echo "Packages installed successfully."
 else
     echo "All required packages (sox, libsox-fmt-mp3, git, perl) are already installed – skipping."
+fi
+
+# Hard check: ensure git and perl are now available
+if ! command -v git >/dev/null 2>&1; then
+    error "git is still not installed after apt. Check your internet or apt sources."
+fi
+if ! command -v perl >/dev/null 2>&1; then
+    error "perl is still not installed after apt. Check your internet or apt sources."
 fi
 
 # Now git and perl are guaranteed to be available – proceed
