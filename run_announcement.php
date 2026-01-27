@@ -19,7 +19,7 @@ if (empty($_POST['file'])) {
 
 // Sanitize input
 $base = basename($_POST['file']); // prevents path traversal, gets just the filename part
-$sounds_dir = "/usr/local/share/asterisk/sounds";
+$sounds_dir = "/usr/local/share/asterisk/sounds/announcements";
 
 // Try possible file locations (with .ul first, then without)
 $possible_files = [
@@ -64,5 +64,6 @@ if ($retval === 0) {
 } else {
     echo "Failed to play $base_name. Output: " . implode("\n", $output);
 }
+
 
 ?>
