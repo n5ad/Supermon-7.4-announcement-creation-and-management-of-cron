@@ -104,13 +104,21 @@ chown -R www-data:www-data "$MP3_DIR"
 chmod -R 2775 "$MP3_DIR"
 echo "MP3 directory permissions set with setgid. $MP3_USER can now access /mp3."
 
-# 4. Set ownership & permissions on custom files
+# 4. Create announcements directory for .ul files
+echo_step "3.5. Creating announcements directory for .ul files"
+ANNOUNCEMENTS_DIR="/var/lib/asterisk/sounds/announcements"
+mkdir -p "$ANNOUNCEMENTS_DIR"
+chown -R www-data:www-data "$ANNOUNCEMENTS_DIR"
+chmod -R 775 "$ANNOUNCEMENTS_DIR"
+echo "Announcements directory created with www-data ownership and 775 permissions."
+
+# 5. Set ownership & permissions on custom files
 echo_step "4. Setting ownership & permissions"
 chown -R www-data:www-data "$TARGET_DIR"
 find "$TARGET_DIR" -type f -name "*.php" -exec chmod 644 {} \;
 find "$TARGET_DIR" -type f -name "*.inc" -exec chmod 644 {} \;
 
-# 4.5. Install prerequisite scripts in /etc/asterisk/local/ (if missing)
+# 6. Install prerequisite scripts in /etc/asterisk/local/ (if missing)
 echo_step "4.5. Installing prerequisite scripts in $LOCAL_DIR"
 mkdir -p "$LOCAL_DIR"
 chown asterisk:asterisk "$LOCAL_DIR" 2>/dev/null || chown root:root "$LOCAL_DIR"
@@ -186,7 +194,7 @@ fi
 chmod +x "$PLAY_SCRIPT" "$CONVERT_SCRIPT" 2>/dev/null || true
 echo "Verified: Both scripts are executable."
 
-# 5. Backup old link.php and install new link.php from repo
+# 7. Backup old link.php and install new link.php from repo
 echo_step "5. Installing new link.php from repository (backup created)"
 if [[ -f "$LINK_PHP" ]]; then
     cp "$LINK_PHP" "${LINK_PHP}.bak"
@@ -200,7 +208,7 @@ chown www-data:www-data "$LINK_PHP"
 chmod 644 "$LINK_PHP"
 echo "New link.php installed successfully."
 
-# 6. Create sudoers rule for www-data
+# 8. Create sudoers rule for www-data
 echo_step "6. Creating sudoers rule for www-data (/etc/sudoers.d/99-supermon-announcements)"
 SUDOERS_FILE="/etc/sudoers.d/99-supermon-announcements"
 if [[ -f "$SUDOERS_FILE" ]]; then
@@ -229,7 +237,7 @@ EOF
     echo "Sudoers file created successfully."
 fi
 
-# 7. Install Piper TTS 1.2.0 ARM64 (your preferred structure)
+# 9. Install Piper TTS 1.2.0 ARM64 (your preferred structure)
 echo_step "7. Installing Piper TTS 1.2.0 ARM64"
 if [[ -f "/opt/piper/bin/piper" ]]; then
     echo "Piper already installed – skipping"
@@ -249,7 +257,7 @@ else
     echo "Piper installed successfully."
 fi
 
-# 8. Download piper_generate.php and piper_prompt_tts.sh
+# 10. Download piper_generate.php and piper_prompt_tts.sh
 echo_step "8. Downloading piper_generate.php and piper_prompt_tts.sh"
 # Download piper_generate.php
 if [[ -f "$TARGET_DIR/piper_generate.php" ]]; then
@@ -273,7 +281,7 @@ else
     echo "piper_prompt_tts.sh downloaded and made executable."
 fi
 
-# 9. Test Piper installation
+# 11. Test Piper installation
 echo_step "9. Testing Piper installation"
 /opt/piper/bin/piper/piper --version
 # Generate a test WAV
@@ -281,7 +289,7 @@ echo "This is a test of Piper TTS on node $(hostname)" | /opt/piper/bin/piper/pi
 # Check the test file
 ls -l /mp3/piper_test.wav
 
-# 10. Final verification
+# 12. Final verification
 echo_step "10. Setup complete – verification"
 echo "I hope you get a lot of use from this"
 echo "Log into Supermon → Announcements Manager should now appear at the bottom."
