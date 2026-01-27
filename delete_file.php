@@ -18,7 +18,7 @@ $filename = basename($_POST['file']);
 if ($type === 'mp3') {
     $file_path = "/mp3/" . $filename;
 } elseif ($type === 'ul') {
-    $file_path = "/usr/local/share/asterisk/sounds/" . $filename;
+    $file_path = "/usr/local/share/asterisk/sounds/announcements/" . $filename;
 } else {
     echo "Invalid type.";
     exit;
@@ -35,3 +35,4 @@ if (unlink($file_path)) {
     echo "Failed to delete $filename. Check permissions.";
 }
 ?>
+
