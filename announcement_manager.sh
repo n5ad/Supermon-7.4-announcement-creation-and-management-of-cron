@@ -240,6 +240,45 @@ chown www-data:www-data "$LINK_PHP"
 chmod 644 "$LINK_PHP"
 echo "New link.php installed successfully."
 
+# STEP 9.5 Install custom index.html for Allmon3 web root
+echo_step "9.5 Installing custom index.html for Allmon3 (/usr/share/allmon3/)"
+
+ALLMON_WEB_ROOT="/usr/share/allmon3"
+INDEX_FILE="$ALLMON_WEB_ROOT/index.html"
+INDEX_ORIG="$ALLMON_WEB_ROOT/index.html.orig"
+INDEX_SPARE="$ALLMON_WEB_ROOT/index.html.spare"
+
+mkdir -p "$ALLMON_WEB_ROOT"
+
+# Backup existing index.html if it exists
+if [[ -f "$INDEX_FILE" ]]; then
+    if [[ ! -f "$INDEX_ORIG" ]]; then
+        cp -v "$INDEX_FILE" "$INDEX_ORIG"
+        echo "Backup created: $INDEX_ORIG"
+    else
+        echo "Original backup $INDEX_ORIG already exists – skipping backup"
+    fi
+fi
+
+# Download fresh index.html from repo (raw URL)
+INDEX_URL="https://raw.githubusercontent.com/n5ad/announcement-manager/main/index.html"
+
+wget -O "$INDEX_FILE.tmp" "$INDEX_URL" || error "Failed to download index.html from repo"
+
+# Install it
+mv "$INDEX_FILE.tmp" "$INDEX_FILE"
+chown root:root "$INDEX_FILE"
+chmod 644 "$INDEX_FILE"
+echo "Installed new index.html → $INDEX_FILE"
+
+# Create spare copy of the new file
+if [[ ! -f "$INDEX_SPARE" ]]; then
+    cp -v "$INDEX_FILE" "$INDEX_SPARE"
+    echo "Spare copy created: $INDEX_SPARE"
+else
+    echo "Spare copy $INDEX_SPARE already exists – skipping"
+fi
+
 # STEP 10. Create sudoers rule for www-data
 echo_step "10. Creating sudoers rule for www-data (/etc/sudoers.d/99-supermon-announcements)"
 SUDOERS_FILE="/etc/sudoers.d/99-supermon-announcements"
