@@ -283,11 +283,13 @@ fi
 # STEP 12. Create sudoers rule for www-data
 echo_step "12. Creating sudoers rule for www-data (/etc/sudoers.d/99-supermon-announcements)"
 SUDOERS_FILE="/etc/sudoers.d/99-supermon-announcements"
-if [[ -f "$SUDOERS_FILE" ]]; then
-    echo "$SUDOERS_FILE already exists – skipping"
-else
+# if [[ -f "$SUDOERS_FILE" ]]; then
+#    echo "$SUDOERS_FILE already exists – skipping"
+# else
     cat > "$SUDOERS_FILE" << 'EOF'
 # /etc/sudoers.d/99-supermon-announcements
+# this file is managed by announcement_manager.sh do not edit manually
+# if you there are updates released for this feature, just re-run the install file
 www-data ALL=(root) NOPASSWD: /etc/asterisk/local/playaudio.sh
 www-data ALL=(root) NOPASSWD: /usr/bin/crontab
 www-data ALL=(root) NOPASSWD: /etc/asterisk/local/audio_convert.sh
