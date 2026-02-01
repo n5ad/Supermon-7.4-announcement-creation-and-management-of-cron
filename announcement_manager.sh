@@ -236,8 +236,7 @@ if [[ -f "$LINK_PHP" ]]; then
     cp "$LINK_PHP" "${LINK_PHP}.bak"
     echo "Backup created: $LINK_PHP.bak"
 fi
-sudo wget -O "$LINK_PHP" \
-  https://raw.githubusercontent.com/n5ad/announcement-manager/main/link.php || error "Failed to download new link.php"
+sudo wget -O "$LINK_PHP" https://raw.githubusercontent.com/n5ad/announcement-manager/main/link.php || error "Failed to download new link.php"
 chown www-data:www-data "$LINK_PHP"
 chmod 644 "$LINK_PHP"
 echo "New link.php installed successfully."
