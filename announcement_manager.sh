@@ -301,7 +301,7 @@ EOF
     chmod 0440 "$SUDOERS_FILE"
     chown root:root "$SUDOERS_FILE"
     echo "Sudoers file created successfully."
-fi
+# fi
 
 # STEP 13. Install Piper TTS 1.2.0 ARM64
 echo_step "13. Installing Piper TTS 1.2.0 ARM64"
