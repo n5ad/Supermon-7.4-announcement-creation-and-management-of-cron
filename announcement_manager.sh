@@ -304,8 +304,8 @@ fi
 
 # STEP 11. Install Piper TTS 1.2.0 ARM64
 echo_step "11. Installing Piper TTS 1.2.0 ARM64"
-if [[ -f "/opt/piper/bin/piper" ]]; then
-    echo "Piper already installed – skipping"
+if [[ -f "/opt/piper/bin/piper" && -f "/opt/piper/voices/en_US-lessac-medium.onnx" ]]; then
+    echo "Piper and voice model already installed – skipping"
 else
     sudo wget https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_arm64.tar.gz -O /tmp/piper.tar.gz
     sudo mkdir -p /opt/piper/bin
