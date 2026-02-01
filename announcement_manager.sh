@@ -28,7 +28,7 @@ LINK_PHP="/var/www/html/supermon/link.php"
 MP3_DIR="/mp3"
 LOCAL_DIR="/etc/asterisk/local"
 ANNOUNCE_DIR="/usr/local/share/asterisk/sounds/announcements"
-
+ALLMON_DIR="/usr/share/allmon3/custom"
 # ────────────────────────────────────────────────
 # Helpers
 # ────────────────────────────────────────────────
@@ -145,7 +145,7 @@ fi
 EOF
     chmod +x "$GLOBAL_SCRIPT"
     chown asterisk:asterisk "$GLOBAL_SCRIPT" 2>/dev/null || chown root:root "$GLOBAL_SCRIPT"
-    chmod 755 "$GLOBALSCRIPT"
+    chmod 755 "$GLOBAL_SCRIPT"
     echo "Created $GLOBAL_SCRIPT with node number: $NODE_NUMBER"
 else
     echo "$GLOBAL_SCRIPT already exists – skipping"
