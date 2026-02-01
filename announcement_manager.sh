@@ -4,17 +4,19 @@
 # Fully automates Supermon Announcements Manager setup:
 # - Installs required packages: sox + libsox-fmt-mp3 (for MP3 support) + git + perl
 # - Copies files from GitHub to /var/www/html/supermon/custom/
-# - Installs prerequisite scripts: playaudio.sh & audio_convert.sh in /etc/asterisk/local/ (exact from KD5FMU repos)
+# - Installs prerequisite scripts: playaudio.sh, playglobal.sh & audio_convert.sh in /etc/asterisk/local/ (exact from KD5FMU repos and one custom by n5ad)
 # - Creates /mp3 directory with correct permissions (2775, setgid)
+# - Creates /usr/share/allmon3/custom directory with correct permissions and copies allmon-announcement.inc file there
 # - Automatically grants access to the invoking user
 # - Sets ownership & permissions on files
 # - Backs up old link.php to link.php.bak and installs new link.php from repo
+# - Backs up old index.html file to index.html.original installs new index.html and copy index.html.copy
 # - Creates /etc/sudoers.d/99-supermon-announcements for www-data (passwordless access to required commands)
 # - Installs Piper TTS 1.2.0 ARM64 (binary + libs in /opt/piper/bin/, voices in /opt/piper/voices/)
 # - Downloads piper_generate.php and piper_prompt_tts.sh and makes them executable
 # - Safe & idempotent (can run multiple times)
 #
-# Run as root: sudo bash setup-supermon-announcements.sh
+# Run as root: sudo bash announcement_manager.sh
 # Author: N5AD - January 2026 (updated)
 set -euo pipefail
 
