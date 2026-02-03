@@ -319,6 +319,8 @@ else
     sudo chown www-data:www-data *.onnx *.onnx.json
     sudo chmod 644 *.onnx *.onnx.json
     rm /tmp/piper.tar.gz
+    echo "Setting Piper Voice Speed"
+    sudo sed -i 's/"length_scale": 1,/"length_scale": 1.2,/' /opt/piper/voices/en_US-lessac-medium.onnx.json
     echo "Piper installed successfully."
 fi
 
