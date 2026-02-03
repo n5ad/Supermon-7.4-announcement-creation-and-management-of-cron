@@ -320,7 +320,25 @@ else
     sudo chmod 644 *.onnx *.onnx.json
     rm /tmp/piper.tar.gz
     echo "Setting Piper Voice Speed"
-    sudo sed -i 's/"length_scale": 1,/"length_scale": 1.2,/' /opt/piper/voices/en_US-lessac-medium.onnx.json
+# === Set slower speaking rate ===
+    echo "Setting Piper voice speed (length_scale = 1.2)"
+    JSON_FILE="/opt/piper/voices/en_US-lessac-medium.onnx.json"
+    
+    # Backup original file
+    sudo cp -f "$JSON_FILE" "${JSON_FILE}.orig" 2>/dev/null || true
+
+    # More robust replacement - matches 1, 1.0, 1.00 etc.
+    sudo sed -i 's/"length_scale"[[:space:]]*:[[:space:]]*[0-9.]\+/"length_scale": 1.2/' "$JSON_FILE"
+
+    # Optional: verify the change
+    if grep -q '"length_scale": 1.2' "$JSON_FILE"; then
+        echo "Successfully set length_scale to 1.2"
+    else
+        echo "Warning: length_scale was not changed (pattern not found)"
+        echo "Current value:"
+        grep "length_scale" "$JSON_FILE" || echo "(not found)"
+    fi
+
     echo "Piper installed successfully."
 fi
 
