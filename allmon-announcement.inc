@@ -11,7 +11,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 <h3>Generate Announcement with Piper TTS</h3>
 <textarea id="tts_text" rows="4" cols="60" placeholder="Enter the text you want to convert to speech..."></textarea><br><br>
 <label for="tts_filename">Filename (one word, letters/numbers/hyphen/underscore only, no extension):</label><br>
-<input type="text" id="tts_filename" placeholder="e.g. morningnet" style="width:220px;"><br><br>
+<input type="text" id="tts_filename" placeholder="e.g. morningnet" style="width:220px;">
 <button id="generate_tts" class="submit">Generate WAV File</button>
 <div id="tts_status" style="margin-top:10px; font-weight:bold; color:#28a745;"></div>
 
