@@ -30,7 +30,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 <br><br>
 
-<label for="tts_voice">Voice:</label>
+<label for="tts_voice">Please select your voice model:</label>
 
 <select id="tts_voice" class="submit" style="width: 250px;">
 
