@@ -20,7 +20,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 <label for="tts_filename">Filename (one word, letters/numbers/hyphen/underscore only, no extension):</label>
 <br>
 <input type="text" id="tts_filename" placeholder="e.g. morningnet" style="width:220px;">
-<br><br>
+
 
 <!-- Voice selection dropdown -->
 <label for="tts_voice">Please select your voice model:</label>
@@ -33,7 +33,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     <option value="/opt/piper/voices/en_US-ryan-high.onnx">Ryan (High, British female)</option>
     <!-- Add more here as you download them -->
 </select>
-<br><br>
+
 
 <button id="generate_tts" class="submit">Generate WAV File</button>
 <div id="tts_status" style="margin-top:10px; font-weight:bold; color:#28a745;"></div>
