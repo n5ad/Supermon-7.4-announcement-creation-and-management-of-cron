@@ -231,8 +231,9 @@ $(document).ready(function() {
                 $("<button>").text("Edit").addClass("small-btn edit")
                     .click(function() {
                         if (c.raw.includes("/bin/bash -c") && c.raw.includes("date +\\%d") && c.raw.includes("playaudio.sh")) {
-                            alert("Editing not available for advanced (nth-week) cron jobs.\n\nDelete and recreate if needed.");
-                            return;
+                            alert("Editing is not available for advanced/nth-week scheduled cron jobs.\n\n" +
+                              "These jobs use special logic (e.g. '2nd Monday of the month').\n" +
+                              "To change this job, please delete it and create a new one.");
                         }
                         let p = c.time.split(" ");
                         let min   = prompt("Minute:", p[0]); if (min === null) return;
