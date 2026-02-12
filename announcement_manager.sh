@@ -284,9 +284,9 @@ chmod 644 "$LINK_PHP"
 echo "link.php permissions verified."
 
 # ────────────────────────────────────────────────
-# STEP 10c – Apply your preferred IPv4 LAN detection block
+# STEP 10.1 – Apply your preferred IPv4 LAN detection block
 # ────────────────────────────────────────────────
-echo_step "10c. Applying your preferred IPv4 LAN detection"
+echo_step "10.1. Applying your preferred IPv4 LAN detection"
 
 # Backup
 [ -f "${LINK_PHP}.ipv4.bak" ] || cp -v "$LINK_PHP" "${LINK_PHP}.ipv4.bak"
